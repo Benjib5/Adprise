@@ -102,10 +102,10 @@ def prever_rede_social(categoria_empresa, genero=None, localidade=None, faixa_et
 # Função para exibir as redes sociais com descrições
 def exibir_resultados(resultados):
     for i, (rede, probabilidade) in enumerate(resultados):
-        st.subheader(f"{i+1}. {desc[desc['rede'].str.lower() == rede]['rede'].values}")
+        st.subheader(f"{i+1}. {desc[desc['rede'].str.lower() == rede]['rede'].values[0]}")
         # Descrições de cada rede social e público
-        st.write(f"**Descrição**: {desc[desc['rede'].str.lower() == rede]['desc'].values}")
-        st.write(f"**Público**: {desc[desc['rede'].str.lower() == rede]['publico'].values}")
+        st.write(f"**Descrição**: {desc[desc['rede'].str.lower() == rede]['desc'].values[0]}")
+        st.write(f"**Público**: {desc[desc['rede'].str.lower() == rede]['publico'].values[0]}")
         st.write("---")
 
 # Streamlit - Interface
