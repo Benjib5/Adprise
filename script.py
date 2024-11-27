@@ -1,5 +1,10 @@
 import streamlit as st
 import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
 import joblib
 
 # Adicionando o código para definir a imagem de fundo
@@ -14,6 +19,18 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
+# Colunas categóricas
+categorical_columns = ['categoria', 'genero', 'nacional']
+interest_columns = ['Saúde e bem-estar',
+       'Educação e aprendizado', 'Esportes', 'Fotografia', 'Fitness',
+       'Carros e automóveis', 'Finanças e investimentos',
+       'Atividades ao ar livre', 'Parentalidade e família', 'História',
+       'Jogos', 'Música', 'Tecnologia', 'Moda', 'Faça você mesmo e artesanato',
+       'Livros', 'Negócios e empreendedorismo', 'Natureza', 'Beleza',
+       'Ciência', 'Alimentos e refeições', 'Causas sociais e ativismo',
+       'Jardinagem', 'Filmes', 'Arte', 'Culinária', 'Viagem', 'Política',
+       'Animais de estimação']  # Encontrar as colunas de interesse
 
 # Carregando o modelo KNN
 knn = joblib.load("knn_treinado.pkl")
@@ -30,9 +47,7 @@ def prever_rede_social(categoria_empresa, genero=None, localidade=None, faixa_et
     # Construindo o vetor de entrada para a previsão
     # Para cada variável, verificamos e montamos a entrada com base nos parâmetros fornecidos
     entrada_usuario = {
-        'categoria': categoria_empresa,
         'genero': genero if genero else 'não especificado',  # Caso não tenha gênero, colocamos 'não especificado'
-        'nacional': localidade if localidade else 'não especificado',  # Caso não tenha localidade, colocamos 'não especificado'
         'idade': faixa_etaria_min if faixa_etaria_min else 0,  # Caso não tenha idade mínima, assumimos 0
     }
 
@@ -42,6 +57,9 @@ def prever_rede_social(categoria_empresa, genero=None, localidade=None, faixa_et
             entrada_usuario[col] = 1
         else:
             entrada_usuario[col] = 0
+
+    entrada_usuario['categoria'] = categoria_empresa
+    entrada_usuario['nacional'] = localidade if localidade else 'não especificado',  # Caso não tenha localidade, colocamos 'não especificado'
 
     # Convertendo o dicionário para um DataFrame para a previsão
     entrada_usuario_df = pd.DataFrame([entrada_usuario])
