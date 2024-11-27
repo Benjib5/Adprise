@@ -1,5 +1,10 @@
 import streamlit as st
 import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
 import joblib
 
 # Adicionando o código para definir a imagem de fundo
