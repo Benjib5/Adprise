@@ -5,7 +5,6 @@ from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
-import joblib
 
 # Adicionando o código para definir a imagem de fundo
 st.markdown(
@@ -20,6 +19,17 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+df = pd.read_csv('social_media_1.csv')
+for i in range(9):
+    df = pd.concat([df, pd.read_csv(f'social_media_{i+2}.csv')])
+
+desc = pd.read_csv('media_description.csv')
+
+cat = pd.read_csv('media_categories.csv')
+
+# Criando um pipeline com um transformer para as variáveis categóricas (OneHotEncoder)
+# Usar StandardScaler para a variável contínua 'idade'
+
 # Colunas categóricas
 categorical_columns = ['categoria', 'genero', 'nacional']
 interest_columns = ['Saúde e bem-estar',
@@ -32,22 +42,37 @@ interest_columns = ['Saúde e bem-estar',
        'Jardinagem', 'Filmes', 'Arte', 'Culinária', 'Viagem', 'Política',
        'Animais de estimação']  # Encontrar as colunas de interesse
 
-# Carregando o modelo KNN
-knn = joblib.load("knn_treinado.pkl")
+# Definindo o transformer para as variáveis categóricas e as colunas de interesse
+# Usaremos o OneHotEncoder para as variáveis categóricas e interesses
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('cat', OneHotEncoder(handle_unknown='ignore'), categorical_columns),  # Categóricas (OneHotEncoding)
+        ('interest', 'passthrough', interest_columns),  # Manter as colunas de interesse inalteradas
+        ('age', StandardScaler(), ['idade'])  # Escalonamento da variável idade
+    ])
 
-desc = pd.read_csv('media_description.csv')
+# Preparando o modelo KNN dentro de um Pipeline
+knn = Pipeline(steps=[
+    ('preprocessor', preprocessor),  # Pré-processamento
+    ('classifier', KNeighborsClassifier(n_neighbors=11))  # Classificador KNN
+])
 
-cat = pd.read_csv('media_categories.csv')
+# Separando as variáveis independentes (X) e a variável dependente (y)
+X = df.drop(columns=['rede social', 'pais'])
+y = df['rede social']
 
-# Criando um pipeline com um transformer para as variáveis categóricas (OneHotEncoder)
-# Usar StandardScaler para a variável contínua 'idade'
+# Dividindo o conjunto de dados em treino e teste
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
 
 # Função para prever a rede social com base nos dados de entrada do usuário
 def prever_rede_social(categoria_empresa, genero=None, localidade=None, faixa_etaria_min=None, faixa_etaria_max=None, interesses=[]):
     # Construindo o vetor de entrada para a previsão
     # Para cada variável, verificamos e montamos a entrada com base nos parâmetros fornecidos
     entrada_usuario = {
+        'categoria': categoria_empresa,
         'genero': genero if genero else 'não especificado',  # Caso não tenha gênero, colocamos 'não especificado'
+        'nacional': localidade if localidade else 'não especificado',  # Caso não tenha localidade, colocamos 'não especificado'
         'idade': faixa_etaria_min if faixa_etaria_min else 0,  # Caso não tenha idade mínima, assumimos 0
     }
 
@@ -58,11 +83,11 @@ def prever_rede_social(categoria_empresa, genero=None, localidade=None, faixa_et
         else:
             entrada_usuario[col] = 0
 
-    entrada_usuario['categoria'] = categoria_empresa
-    entrada_usuario['nacional'] = localidade if localidade else 'não especificado',  # Caso não tenha localidade, colocamos 'não especificado'
-
     # Convertendo o dicionário para um DataFrame para a previsão
     entrada_usuario_df = pd.DataFrame([entrada_usuario])
+
+    # Treinando o modelo KNN
+    knn.fit(X_train, y_train)
 
     # Fazendo a previsão com o modelo KNN
     probabilidade = knn.predict_proba(entrada_usuario_df)
@@ -97,7 +122,7 @@ if nome_empresa:
     st.write(f"Bem-vindo(a) {nome_empresa}!")
 
     # Seleção de categoria
-    categoria = st.selectbox("Escolha a categoria da sua empresa:", cat['nome'].unique())
+    categoria = st.selectbox("Escolha a categoria da sua empresa:", df['categoria'].unique())
     st.write(f"{cat[cat['nome'] == categoria]['desc'].values[0]}")
     
     # Seleção de gênero
