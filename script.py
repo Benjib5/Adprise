@@ -15,6 +15,18 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+# Colunas categóricas
+categorical_columns = ['categoria', 'genero', 'nacional']
+interest_columns = ['Saúde e bem-estar',
+       'Educação e aprendizado', 'Esportes', 'Fotografia', 'Fitness',
+       'Carros e automóveis', 'Finanças e investimentos',
+       'Atividades ao ar livre', 'Parentalidade e família', 'História',
+       'Jogos', 'Música', 'Tecnologia', 'Moda', 'Faça você mesmo e artesanato',
+       'Livros', 'Negócios e empreendedorismo', 'Natureza', 'Beleza',
+       'Ciência', 'Alimentos e refeições', 'Causas sociais e ativismo',
+       'Jardinagem', 'Filmes', 'Arte', 'Culinária', 'Viagem', 'Política',
+       'Animais de estimação']  # Encontrar as colunas de interesse
+
 # Carregando o modelo KNN
 knn = joblib.load("knn_treinado.pkl")
 
