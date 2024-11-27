@@ -39,7 +39,7 @@ knn = Pipeline(steps=[
 ])
 
 # Separando as variáveis independentes (X) e a variável dependente (y)
-X = df.drop(columns=['rede social', 'pais'])
+X = df.drop(columns=['Unnamed: 0','rede social', 'pais'])
 y = df['rede social']
 
 # Dividindo o conjunto de dados em treino e teste
