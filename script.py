@@ -47,9 +47,7 @@ def prever_rede_social(categoria_empresa, genero=None, localidade=None, faixa_et
     # Construindo o vetor de entrada para a previsão
     # Para cada variável, verificamos e montamos a entrada com base nos parâmetros fornecidos
     entrada_usuario = {
-        'categoria': categoria_empresa,
         'genero': genero if genero else 'não especificado',  # Caso não tenha gênero, colocamos 'não especificado'
-        'nacional': localidade if localidade else 'não especificado',  # Caso não tenha localidade, colocamos 'não especificado'
         'idade': faixa_etaria_min if faixa_etaria_min else 0,  # Caso não tenha idade mínima, assumimos 0
     }
 
@@ -59,6 +57,9 @@ def prever_rede_social(categoria_empresa, genero=None, localidade=None, faixa_et
             entrada_usuario[col] = 1
         else:
             entrada_usuario[col] = 0
+
+    entrada_usuario['categoria'] = categoria_empresa
+    entrada_usuario['nacional'] = localidade if localidade else 'não especificado',  # Caso não tenha localidade, colocamos 'não especificado'
 
     # Convertendo o dicionário para um DataFrame para a previsão
     entrada_usuario_df = pd.DataFrame([entrada_usuario])
